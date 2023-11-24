@@ -110,5 +110,23 @@ let from_file path =
   let final_graph = loop empty_graph in
   
   close_in infile ;
-  final_graph
+  final_graph;;
+
+let export gr = 
+  e_fold 
+  rankdir=LR;
+  arc.src -> arc.tgt [label = arc.lbl];
+
+
+
+
+
+(*
+  digraph finite_state_machine {
+    
+    node [shape = doublecircle]; 0 3 4 8;
+    node [shape = circle];
+    0 -> 2 [label = "SS(B)"];*)
+ }
+
   

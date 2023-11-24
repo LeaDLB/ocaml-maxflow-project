@@ -3,32 +3,6 @@
   You do not need to read this file for the project. Read graph.mli instead.
 
   You may read it though, out of curiosity.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 *)
 
 

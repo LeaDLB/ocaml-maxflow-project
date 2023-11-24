@@ -1,0 +1,14 @@
+(* Yes, we have to repeat open Graph. *)
+open Graph
+
+(* assert false is of type ∀α.α, so the type-checker is happy. *)(*
+let clone_nodes gr = 
+  let rec aux gr l = match gr with
+    |[] -> List.rev l
+    |(x, _)::tail -> aux tail ((x,[])::l)
+  in aux gr [] 
+;;*)
+let clone_nodes gr = n_fold gr new_node empty_graph;;
+let gmap gr f = e_fold gr (fun acc arc -> new_arc acc {src = arc.src; tgt = arc.tgt; lbl = f (arc.lbl)}) (clone_nodes gr);;
+let add_arc gr src dst v = new_arc gr ({src = src; tgt = dst; lbl = v});;
+(* Replace _gr and _f by gr and f when you start writing the real function. *)
