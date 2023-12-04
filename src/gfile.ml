@@ -112,21 +112,20 @@ let from_file path =
   close_in infile ;
   final_graph;;
 
-let export gr = 
-  e_fold 
-  rankdir=LR;
-  arc.src -> arc.tgt [label = arc.lbl];
 
+  let export gr path = 
+    let ff = open_out path in
 
-
-
-
-(*
-  digraph finite_state_machine {
+    (* Write in this file. *)
+    fprintf ff "digraph finite_state_machine {
+      fontname=\"Helvetica,Arial,sans-serif\"
+      node [fontname=\"Helvetica,Arial,sans-serif\"]
+      edge [fontname=\"Helvetica,Arial,sans-serif\"]
+      rankdir=LR;\nnode [shape = circle];\n" ;
+      let _ = e_iter gr (fun arc -> Printf.fprintf ff "%d -> %d [label = \"%s\"];\n" arc.src arc.tgt arc.lbl) in
     
-    node [shape = doublecircle]; 0 3 4 8;
-    node [shape = circle];
-    0 -> 2 [label = "SS(B)"];*)
- }
-
-  
+      fprintf ff "}\n" ;
+    
+    close_out ff ;
+    ()
+  ;;

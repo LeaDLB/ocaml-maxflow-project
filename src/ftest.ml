@@ -1,5 +1,6 @@
 open Gfile
 open Tools
+open Algoff
     
 let () =
 
@@ -33,6 +34,7 @@ let () =
   let graph_extended = add_arc graph 2 4 "toto" in
   (* Rewrite the graph that has been read. *)
   let () = write_file outfile graph_extended in
-
+  let () = export graph "./exportfile.txt"  in
+  let test = find_path 0 2 graph 
   ()
 
