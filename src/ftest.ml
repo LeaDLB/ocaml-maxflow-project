@@ -1,6 +1,6 @@
-open Gfile
 open Tools
-open Algoff
+open Gfile
+open Ford_fulkerson
     
 let () =
 
@@ -29,12 +29,11 @@ let () =
 
   (* Open file *)
   let graph = from_file infile in
-  (*let graph_cloned = clone_nodes graph in
-  let graph_mapped = gmap graph (fun x->x) in*)
-  let graph_extended = add_arc graph 2 4 "toto" in
+  let int_graph = gmap graph int_of_string in
   (* Rewrite the graph that has been read. *)
-  let () = write_file outfile graph_extended in
-  let () = export graph "./exportfile.txt"  in
-  let test = find_path 0 2 graph 
+  let () = write_file outfile graph in
+  (*let () = export graph "./exportfile.txt"  in*)
+  let test = find_path 0 5 int_graph in
+  let () = Printf.printf "%s%!" test in
   ()
 
