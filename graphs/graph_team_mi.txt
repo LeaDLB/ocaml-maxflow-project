@@ -1,0 +1,6 @@
+%% This is a graph.
+
+n 20 300 0
+n 300 300 50
+ 
+%% End of graph

@@ -1,3 +1,4 @@
+
 (* Type team *)
 type team =
   { (* Wins *)
@@ -10,14 +11,17 @@ type team =
     total_left: int ;
     
     (* Games left against MI*)
-    left_mi = int;
+    left_mi : int;
     
     (* Games left against CSK*)
-    left_csk = int;
+    left_csk : int;
     
     (* Games left against KKR*)
-    left_kkr = int;
+    left_kkr : int;
     
     (* Games left against DC*)
-    left_dc = int;
+    left_dc : int;
   }
+
+val write_graph:  string-> unit
+val read_text_file : string->unit
