@@ -1,6 +1,7 @@
 open Tools
 open Gfile
 open Ford_fulkerson
+open Teams
     
 let () =
 
@@ -28,17 +29,20 @@ let () =
   in
 
   (* Open file *)
+
   let graph = from_file infile in
 
   let int_graph = gmap graph int_of_string in
   let (new_graph, flow) = (algo_ford_fulkerson int_graph 0 5) in 
   let result_graph = gmap new_graph string_of_int in
   let () = Printf.printf "flow = %d%!\n" flow in
+
   (* Rewrite the graph that has been read. *)
 
   let () = write_file outfile result_graph in
   (*let () = export graph "./exportfile.txt"  in*)
-  
+
+ 
 
   
   ()
