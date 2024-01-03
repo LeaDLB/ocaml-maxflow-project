@@ -41,12 +41,8 @@ let () =
 
   let () = write_file outfile result_graph in
   (*let () = export graph "./exportfile.txt"  in*)
-  let file = "graphs/graph_team_mi.txt" in 
-  let () = write_graph file in 
-  
-
- 
-
-  
+  let file = "score.txt" in 
+  let score = read_teams file in   
+  let () = print_score score in
   ()
 

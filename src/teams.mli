@@ -1,7 +1,10 @@
 
 (* Type team *)
 type team =
-  { (* Wins *)
+  { 
+    name : string ;
+
+    (* Wins *)
     wins: int ;
 
     (* Losses *)
@@ -24,4 +27,6 @@ type team =
   }
 
 val write_graph:  string-> unit
+val read_teams : string->team list
 val read_text_file : string->unit
+val print_score : team list -> unit
