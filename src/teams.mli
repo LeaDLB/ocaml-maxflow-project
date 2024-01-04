@@ -26,7 +26,7 @@ type team =
     left_dc : int;
   }
 
-val write_graph:  string-> unit
+val write_graph:  string->team list-> unit
 val read_teams : string->team list
 val read_text_file : string->unit
 val print_score : team list -> unit

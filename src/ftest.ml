@@ -1,6 +1,8 @@
-open Tools
-open Gfile
-open Ford_fulkerson
+
+
+(*open Ford_fulkerson
+  open Gfile
+open Tools*)
 open Teams
     
 let () =
@@ -19,7 +21,7 @@ let () =
 
 
   (* Arguments are : infile(1) source-id(2) sink-id(3) outfile(4) *)
-  
+  (*
   let infile = Sys.argv.(1)
   and outfile = Sys.argv.(4)
   
@@ -29,7 +31,7 @@ let () =
   in
 
   (* Open file *)
-
+  
   let graph = from_file infile in
 
   let int_graph = gmap graph int_of_string in
@@ -40,7 +42,7 @@ let () =
   (* Rewrite the graph that has been read. *)
 
   let () = write_file outfile result_graph in
-  (*let () = export graph "./exportfile.txt"  in*)
+  (*let () = export graph "./exportfile.txt"  in*)*)
   let file = "score.txt" in 
   let score = read_teams file in   
   let () = print_score score in

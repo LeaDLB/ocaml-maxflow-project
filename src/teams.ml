@@ -11,39 +11,71 @@ type team =
     left_kkr : int;
     left_dc : int
   }
-(*
-let mi  = {wins=83; losses=71; total_left=8; left_mi=0; left_csk=1; left_kkr=6; left_dc=1};;
-let csk = {wins=80; losses=79; total_left=3; left_mi=1; left_csk=0; left_kkr=0; left_dc=2};;
-let kkr = {wins=78; losses=78; total_left=6; left_mi=6; left_csk=0; left_kkr=0; left_dc=0};;
-let dc  = {wins=77; losses=82; total_left=3; left_mi=1; left_csk=2; left_kkr=0; left_dc=0};;
 
-let list_teams = [mi,csk,kkr,dc];;*)
+  
+let mi  = {name = "mi";  wins=83; losses=71; total_left=8; left_mi=0; left_csk=1; left_kkr=6;left_dc=1};;
+let csk = {name = "csk"; wins=80; losses=79; total_left=3; left_mi=1; left_csk=0; left_kkr=0;left_dc=2};;
+let kkr = {name = "kkr"; wins=78; losses=78; total_left=6; left_mi=6; left_csk=0; left_kkr=0;left_dc=0};;
+let dc  = {name = "dc";  wins=77; losses=82; total_left=3; left_mi=1; left_csk=2; left_kkr=0;left_dc=0};;
+let team_list = [mi; csk; kkr; dc];;
 
-(*Index of teams:
-MI  = 1
-CSK = 2
-KKR = 3
-DC  = 4
-*)
 
-let write_graph file = 
+let other_teams current_team team_list = 
+  let rec loop other_teams team_list =
+    match team_list with
+    |[]-> other_teams
+    |a::next -> if (a.name = current_team) then loop other_teams next else loop (a::other_teams) next 
+  in 
+  loop [] team_list
+;;
+
+
+let find_match_pairs list = 
+  let rec loop pairs list = 
+    match list with
+    |[] -> pairs
+    |a::next -> 
+        let rec loop2 pairs list2 = 
+          match list2 with 
+          |[]-> pairs
+          |b::next -> 
+              if (b.name="csk") then loop2 ([a,b,a.left_csk]::pairs) next else
+              if (b.name="mi")  then loop2 ([a,b,a.left_mi ]::pairs) next else 
+              if (b.name="kkr") then loop2 ([a,b,a.left_kkr]::pairs) next else 
+                loop2 ([a,b,a.left_dc ]::pairs) next 
+        in let pairs = loop2 pairs next in
+        loop pairs next
+  in loop [] list
+;;
+          
+let write_graph file current_team team_list = 
+  (*file = already created empty team graph file
+    index = index of current team in the list
+    team_list = list of all teams *)
+
+  (*Open the team graph file to write in*)
   let ff = Out_channel.open_text file in 
   Out_channel.output_string ff "%% This is a graph.\n\n" ;
+
+  let others = other_teams current_team team_list in 
+  let pairs = find_match_pairs others in 
+
 
   (*Write source node and target node*)
   Out_channel.output_string ff "n 20 300 0\n" ;
   Out_channel.output_string ff "n 300 300 50\n " ;
-
-  (* Write all nodes (with fake coordinates) 
-  n_iter_sorted graph (fun id -> fprintf ff "n %d %d %d\n" (compute_x id) (compute_y id) id) ;
-  fprintf ff "\n" ;*)
-
-
-  (* Write all arcs 
-  let _ = e_fold graph (fun count arc -> fprintf ff "e %d %d %d %s\n" arc.src arc.tgt count arc.lbl ; count + 1) 0 in*)
+  (*
+  let rec loop_pair_nodes pairs = 
+    match pairs with 
+   |[] -> Out_channel.output_string ff  "\n";
+   |(a,b,v)::next -> 
+      Out_channel.output_string ff "n 50 200 %s\n " (a.name^"-"^b.name) ;
+      Out_channel.output_string ff "e 0 %d %d\n " v ;
+      loop_pair_nodes next 
+  in loop_pair_nodes pairs ;
+  *)
 
   Out_channel.output_string ff "\n%% End of graph\n" ;
-
 
   Out_channel.flush ff;
   Out_channel.close ff;
