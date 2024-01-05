@@ -53,10 +53,10 @@ let find_match_pairs list =
           match list2 with 
           |[]-> pairs
           |b::next -> 
-              if (b.name="csk") then loop2 ([a,b,a.left_csk]::pairs) next else
-              if (b.name="mi")  then loop2 ([a,b,a.left_mi ]::pairs) next else 
-              if (b.name="kkr") then loop2 ([a,b,a.left_kkr]::pairs) next else 
-                loop2 ([a,b,a.left_dc ]::pairs) next 
+              if (b.name="csk") then loop2 ((a,b,a.left_csk)::pairs) next else
+              if (b.name="mi")  then loop2 ((a,b,a.left_mi )::pairs) next else 
+              if (b.name="kkr") then loop2 ((a,b,a.left_kkr)::pairs) next else 
+                loop2 ((a,b,a.left_dc )::pairs) next 
         in let pairs = loop2 pairs next in
         loop pairs next
   in loop [] list

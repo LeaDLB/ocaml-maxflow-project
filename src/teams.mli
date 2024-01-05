@@ -26,7 +26,9 @@ type team =
     left_dc : int;
   }
 
-val write_graph:  string->team list-> unit
-val read_teams : string->team list
-val read_text_file : string->unit
-val print_score : team list -> unit
+val write_graph:  string -> team -> team list-> unit
+val read_teams : string -> team list
+(*val read_text_file : string -> unit*)
+val print_team_list : team list -> unit
+val other_teams : string -> team list -> team list
+val find_match_pairs : team list -> (team*team*int) list

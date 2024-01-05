@@ -6,7 +6,7 @@ open Tools*)
 open Teams
     
 let () =
-
+(*
   (* Check the number of command-line arguments *)
   if Array.length Sys.argv <> 5 then
     begin
@@ -21,7 +21,7 @@ let () =
 
 
   (* Arguments are : infile(1) source-id(2) sink-id(3) outfile(4) *)
-  (*
+  
   let infile = Sys.argv.(1)
   and outfile = Sys.argv.(4)
   
@@ -44,7 +44,9 @@ let () =
   let () = write_file outfile result_graph in
   (*let () = export graph "./exportfile.txt"  in*)*)
   let file = "score.txt" in 
-  let score = read_teams file in   
-  let () = print_score score in
+  let team_list = read_teams file in   
+  let () = Printf.printf " - Equipes extraites du fichier score.txt :\n%!" in
+  let () = print_team_list team_list in
+  let () = write_graph "./graphs/graphEquipe1.txt" (List.nth team_list 0) team_list in
   ()
 
