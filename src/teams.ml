@@ -82,7 +82,7 @@ let write_graph file current_team team_list =
     match pairs with 
    |[] -> ()
    |(_,_,v)::next -> 
-      Out_channel.output_string ff ("e 0 "^(string_of_int (index+1))^" "^(string_of_int v)^"\n");
+      Out_channel.output_string ff ("e 0 "^(string_of_int (index+1))^" "^(string_of_int index)^" "^(string_of_int v)^"\n");
       loop_pair_nodes next (index+1)
   in loop_pair_nodes pairs 0;
 
@@ -95,12 +95,12 @@ let write_graph file current_team team_list =
   Out_channel.output_string ff ("\ne 2 4 5 "^(string_of_int) val3);
 
   (*Write the 6 infinite arc*)
-  Out_channel.output_string ff ("\ne 1 4 3 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 1 5 4 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 2 4 5 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 2 6 6 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 3 5 7 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 3 6 8 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 1 4 6 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 1 5 7 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 2 4 8 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 2 6 9 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 3 5 10 "^(string_of_int) max_int);
+  Out_channel.output_string ff ("\ne 3 6 11 "^(string_of_int) max_int);
 
   (*
   let rec loop_pair_nodes pairs = 
