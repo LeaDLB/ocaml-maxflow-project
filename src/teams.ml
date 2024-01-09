@@ -1,6 +1,8 @@
+open Gfile
 
 type team =
  {  
+    id: int;
     name : string ;
     wins: int ;
     losses: int ;
@@ -12,13 +14,11 @@ type team =
     left_dc : int
   }
 
-  (*
-let mi  = {name = "mi";  wins=83; losses=71; total_left=8; left_mi=0; left_csk=1; left_kkr=6;left_dc=1};;
-let csk = {name = "csk"; wins=80; losses=79; total_left=3; left_mi=1; left_csk=0; left_kkr=0;left_dc=2};;
-let kkr = {name = "kkr"; wins=78; losses=78; total_left=6; left_mi=6; left_csk=0; left_kkr=0;left_dc=0};;
-let dc  = {name = "dc";  wins=77; losses=82; total_left=3; left_mi=1; left_csk=2; left_kkr=0;left_dc=0};;
-let team_list = [mi; csk; kkr; dc];;*)
-
+let rec print_team_list l = 
+  match l with
+  |[]-> ()
+  |x::li -> Printf.printf "%d, %s, %d, %d, %d, %d, %d, %d, %d\n%!" x.id x.name x.wins x.losses x.total_left x.left_mi x.left_csk x.left_kkr x.left_dc; 
+  print_team_list li;;
 
 let other_teams current_team team_list = 
   let rec loop other_teams team_list =
@@ -47,52 +47,103 @@ let find_match_pairs list =
         loop pairs next
   in loop [] list
 ;;
+
+let rec write_nodes file length index  = 
+if index=length then () 
+else
+  begin
+    let x = compute_x index in 
+    let y = compute_y index in
+    let string = "n "^(string_of_int x)^" "^(string_of_int y)^" "^(string_of_int index)^"\n" in 
+    Out_channel.output_string file string ; write_nodes file length (index+1)
+  end 
+ ;;
+
+ let rec write_source_arcs file pairs index index_arc= 
+  match pairs with 
+ |[] -> ()
+ |(_,_,v)::next -> 
+    Out_channel.output_string file ("e 0 "^(string_of_int (index))^" "^(string_of_int index_arc)^" "^(string_of_int v)^"\n");
+    write_source_arcs file next (index+1) (index_arc+1)
+ ;;
+
+ let rec write_end_arcs current_team length_pairs length_others file others index_arc = 
+  match others with 
+ |[] -> ()
+ |team::next -> 
+    let v = (current_team.wins+current_team.total_left) - team.wins in
+    let string = ("e "^(string_of_int team.id)^" "^(string_of_int (length_others+length_pairs+1))^" "^(string_of_int index_arc)^" "^(string_of_int v)^"\n") in
+    Out_channel.output_string file string;
+    write_end_arcs current_team length_pairs length_others file next (index_arc+1)
+ ;;
+
+let rec write_infinite_arcs file length_pairs pairs index index_arc=
+  match pairs with 
+  |[] -> ()
+  |(teamA,teamB,_)::next -> 
+    let string1 = "\ne "^(string_of_int (index))^" "^(string_of_int teamA.id)^" "^(string_of_int(index_arc))^" "^(string_of_int max_int) in 
+    let string2 = "\ne "^(string_of_int (index))^" "^(string_of_int teamB.id)^" "^(string_of_int(index_arc+1))^" "^(string_of_int max_int) in 
+    Out_channel.output_string file string1 ;
+    Out_channel.output_string file string2 ;
+    write_infinite_arcs file length_pairs next (index+1) (index_arc+2)
+;; 
+
+
+
+
+
+
+
           
 let write_graph file current_team team_list = 
-  (*file = already created empty team graph file
-    current_team = currentt team in team_list
-    team_list = list of all teams *)
-
   (*Open the team graph file to write in*)
   let ff = Out_channel.open_text file in 
   Out_channel.output_string ff "%% This is a graph.\n\n" ;
 
+  (*Variables*)
   let others = other_teams current_team.name team_list in 
   let pairs = find_match_pairs others in 
-
+  let length_others = List.length others in 
+  let length_pairs = List.length pairs in 
+  
 
   (*Write source node*)
   Out_channel.output_string ff "n 20 300 0\n" ;
   
-
   (*Write nodes*)
+  let () = write_nodes ff length_others 1 in
+  let () = write_nodes ff length_pairs (length_others+1) in 
+  
+  (*Write target node*)
+  Out_channel.output_string ff ("n 500 300 "^(string_of_int (length_others+length_pairs+1))^"\n\n") ;
+
+  (*
   Out_channel.output_string ff "n 100 200 1\n" ;
   Out_channel.output_string ff "n 100 300 2\n" ;
   Out_channel.output_string ff "n 100 400 3\n" ;
 
   Out_channel.output_string ff "n 200 200 4\n" ;
   Out_channel.output_string ff "n 200 300 5\n" ;
-  Out_channel.output_string ff "n 200 400 6\n" ;
+  Out_channel.output_string ff "n 200 400 6\n" ;*)
 
-  (*Write target node*)
-  Out_channel.output_string ff "n 300 300 7\n\n" ;
+  
 
-  (*Write 3 arc from source*)
-  let rec loop_pair_nodes pairs index = 
-    match pairs with 
-   |[] -> ()
-   |(_,_,v)::next -> 
-      Out_channel.output_string ff ("e 0 "^(string_of_int (index+1))^" "^(string_of_int index)^" "^(string_of_int v)^"\n");
-      loop_pair_nodes next (index+1)
-  in loop_pair_nodes pairs 0;
+  (*Write 3 arcs from source*)
+  let () = write_source_arcs ff pairs (length_others+1) 0 in
 
-  (*Write 3 last arc to the target*)
+  (*Write infinite arcs*)
+  let () = write_infinite_arcs ff length_pairs pairs (length_others+1) (length_pairs+2) in
+
+  (*Write 3 last arcs to the target*)
+  let () = write_end_arcs current_team length_pairs length_others ff others (length_pairs*3+1) in 
+
+  (*
   let val1 = (current_team.wins+current_team.total_left) - (List.nth others 0).wins in
   let val2 = (current_team.wins+current_team.total_left) - (List.nth others 1).wins in 
   let val3 = (current_team.wins+current_team.total_left) - (List.nth others 2).wins in
-  Out_channel.output_string ff ("e 1 4 3 "^(string_of_int) val1);
-  Out_channel.output_string ff ("\ne 1 5 4 "^(string_of_int) val2);
-  Out_channel.output_string ff ("\ne 2 4 5 "^(string_of_int) val3);
+  Out_channel.output_string ff ("e 4 7 3 "^(string_of_int) val1);
+  Out_channel.output_string ff ("\ne 5 7 4 "^(string_of_int) val2);
+  Out_channel.output_string ff ("\ne 6 7 5 "^(string_of_int) val3);
 
   (*Write the 6 infinite arc*)
   Out_channel.output_string ff ("\ne 1 4 6 "^(string_of_int) max_int);
@@ -100,20 +151,7 @@ let write_graph file current_team team_list =
   Out_channel.output_string ff ("\ne 2 4 8 "^(string_of_int) max_int);
   Out_channel.output_string ff ("\ne 2 6 9 "^(string_of_int) max_int);
   Out_channel.output_string ff ("\ne 3 5 10 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 3 6 11 "^(string_of_int) max_int);
-
-  (*
-  let rec loop_pair_nodes pairs = 
-    match pairs with 
-   |[] -> Out_channel.output_string ff  "\n";
-   |(a,b,v)::next -> 
-      Out_channel.output_string ff "n 50 200 %s\n " (a.name^"-"^b.name) ;
-      Out_channel.output_string ff "e 0 %d %d\n " v ;
-      loop_pair_nodes next 
-  in loop_pair_nodes pairs ;
-  *)
-
-
+  Out_channel.output_string ff ("\ne 3 6 11 "^(string_of_int) max_int);*)
 
   Out_channel.output_string ff "\n\n%% End of graph\n" ;
 
@@ -135,38 +173,51 @@ let read_teams file =
           (*print_endline line;*) (*ligne d'affichage de la ligne lue*)
 
           let new_team = { 
-            name = List.nth attribute_list 0;
-            wins = int_of_string (List.nth attribute_list 1); 
-            losses = int_of_string (List.nth attribute_list 2);
-            total_left = int_of_string (List.nth attribute_list 3); 
-            left_mi = int_of_string (List.nth attribute_list 4);
-            left_csk = int_of_string (List.nth attribute_list 5);
-            left_kkr = int_of_string (List.nth attribute_list 6);
-            left_dc = int_of_string (List.nth attribute_list 7);
+            id = int_of_string (List.nth attribute_list 0);
+            name = List.nth attribute_list 1;
+            wins = int_of_string (List.nth attribute_list 2); 
+            losses = int_of_string (List.nth attribute_list 3);
+            total_left = int_of_string (List.nth attribute_list 4); 
+            left_mi = int_of_string (List.nth attribute_list 5);
+            left_csk = int_of_string (List.nth attribute_list 6);
+            left_kkr = int_of_string (List.nth attribute_list 7);
+            left_dc = int_of_string (List.nth attribute_list 8);
           } in
             readline (new_team::teams_list); 
       end
     in readline []
 ;;
 
-let rec print_team_list l = 
-  match l with
- |[]-> ()
- |x::li -> Printf.printf "%s, %d, %d, %d, %d, %d, %d, %d\n%!" x.name x.wins x.losses x.total_left x.left_mi x.left_csk x.left_kkr x.left_dc; 
- print_team_list li;;
+
+
+
+
 
 
 
 (*
-let read_text_file file = 
-  let ic = open_in file in
-  try
-    let line = input_line ic in 
-    print_endline line;
-    close_in ic;
-  with e ->
-    close_in_noerr ic;
-    raise e;
-  ;
+let cricket_resolution file =
+  (*
+  - create list of teams
+  - create graph file for each team
+  - apply ford fulkerson to each graph file
+  - conclude if team eliminated or not   
+  *)
+
+  let team_list = read_teams file in 
+  let rec graph_loop team_list results i =
+    match team_list with 
+    |[]-> List.rev results
+    |a::next -> 
+      let graph_file = write_graph ("./graphs/graphEquipe" ^ (string_of_int i)^ ".txt") a team_list in
+      (*transformer file en graph*)
+      (*recup le numero du node target*)
+      let ff_result = algo_ford_fulkerson graph 0 7 in 
+      let sum_arcs = 1(*sum of arcs from source*) in 
+        if sum_arcs = ff_result then graph_loop next (0::results) (i+1)
+        else graph_loop next (1::results) (i+1)
+      
+  in graph_loop team_list [] 0
 ;;
+
 *)

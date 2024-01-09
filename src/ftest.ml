@@ -48,5 +48,6 @@ let () =
   let () = Printf.printf " - Equipes extraites du fichier score.txt :\n%!" in
   let () = print_team_list team_list in
   let () = write_graph "./graphs/graphEquipe1.txt" (List.nth team_list 0) team_list in
+  let () = write_graph "./graphs/graphEquipe2.txt" (List.nth team_list 1) team_list in
   ()
 
