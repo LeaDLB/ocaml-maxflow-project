@@ -35,9 +35,7 @@ val write_nodes_others: out_channel -> team list -> unit
 val write_nodes_pairs: out_channel -> int -> (team*team*int) list -> unit
 val write_source_arcs: out_channel -> (team*team*int) list -> int -> int -> unit
 val write_end_arcs: team -> int -> int -> out_channel -> team list -> int -> unit
-val write_graph:  string -> team -> team list-> unit
+val sum_source_arcs: (team*team*int) list -> int
+val write_graph:  string -> team -> team list-> int
 val read_teams : string -> team list
-
-
-
-(*val cricket_resolution : string -> int list*)
+val cricket_resolution : string -> int list

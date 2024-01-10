@@ -1,4 +1,6 @@
 open Gfile
+open Tools
+open Ford_fulkerson
 type team =
  {  
     id: int;
@@ -100,8 +102,11 @@ let rec write_infinite_arcs file length_pairs pairs index index_arc=
     write_infinite_arcs file length_pairs next (index+1) (index_arc+2) 
 ;; 
 
-
-
+let rec sum_source_arcs pairs = 
+  match pairs with 
+  |[]->0
+  |(_,_,v)::next-> v + (sum_source_arcs next)
+;;
 
 
 
@@ -115,19 +120,16 @@ let write_graph file current_team team_list =
   (*Variables*)
   let others = other_teams current_team.name team_list in 
   let pairs = find_match_pairs others in 
-  let length_others = List.length others in 
   let length_pairs = List.length pairs in 
   let length_teams = List.length team_list in
-  let () = Printf.printf "length others = %d\n%!" length_others in
-  let () = Printf.printf "length pairs %d\n%!" length_pairs in
 
-  (*print pair list*)
+  (*print pair list
   let rec print_pair list = 
     match list with 
     |[] -> ()
-    |(a,b,v)::next-> Printf.printf "TeamA = %s %d   TeamB = %s %d   V = %d\n" a.name  a.id b.name b.id v ; print_pair next
+    |a::next-> Printf.printf "TeamA = %s %d   \n" a.name  a.id ; print_pair next
   in 
-  let () = print_pair pairs in
+  let () = print_pair others in*)
 
   (*Write source node*)
   Out_channel.output_string ff "n 20 300 0\n" ;
@@ -152,7 +154,7 @@ let write_graph file current_team team_list =
 
   Out_channel.flush ff;
   Out_channel.close ff;
-  ()
+  sum_source_arcs pairs
 ;;
 
 let read_teams file =
@@ -183,36 +185,35 @@ let read_teams file =
     in readline []
 ;;
 
-
-
-
-
-
-
-
-(*
-let cricket_resolution file =
-  (*
-  - create list of teams
-  - create graph file for each team
-  - apply ford fulkerson to each graph file
-  - conclude if team eliminated or not   
-  *)
-
-  let team_list = read_teams file in 
-  let rec graph_loop team_list results i =
-    match team_list with 
-    |[]-> List.rev results
-    |a::next -> 
-      let graph_file = write_graph ("./graphs/graphEquipe" ^ (string_of_int i)^ ".txt") a team_list in
-      (*transformer file en graph*)
-      (*recup le numero du node target*)
-      let ff_result = algo_ford_fulkerson graph 0 7 in 
-      let sum_arcs = 1(*sum of arcs from source*) in 
-        if sum_arcs = ff_result then graph_loop next (0::results) (i+1)
-        else graph_loop next (1::results) (i+1)
-      
-  in graph_loop team_list [] 0
+let print_results list team_list =
+  let rec loop index list = 
+    match list with 
+    |[]-> ()
+    |a::next when a=0 -> Printf.printf "Equipe %s est éliminée\n%!" (List.nth team_list index).name ; loop (index+1) next
+    |_::next -> Printf.printf "Equipe %s n'est pas éliminée\n%!" (List.nth team_list index).name ; loop (index+1) next
+  in loop 0 list
 ;;
 
-*)
+let cricket_resolution file =
+  let team_list = read_teams file in 
+  
+  let rec graph_loop list results =
+    match list with 
+    |[]-> print_results (List.rev results) team_list ; List.rev results
+    |a::next ->
+      (*ecrire graph file*)
+      let sum_arcs = write_graph ("./graphs/graphEquipe" ^ (string_of_int a.id)^ ".txt") a team_list in
+      (*transformer file en graph*)
+      let graph = from_file ("./graphs/graphEquipe" ^ (string_of_int a.id)^ ".txt") in
+      let int_graph = gmap graph int_of_string in
+      (*recup le numero du node target*)
+      let (_,maxflow) = algo_ford_fulkerson int_graph 0 8 in 
+      if (maxflow >=0 && sum_arcs = maxflow) then graph_loop next (1::results) 
+      else graph_loop next (0::results) 
+  in graph_loop team_list []
+;;
+
+
+
+(*1 = pas eliminé
+   0 = éliminé*)

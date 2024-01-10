@@ -1,11 +1,5 @@
-
-
-(*open Ford_fulkerson
-  open Gfile
-open Tools*)
 open Teams
-open Gfile
-    
+
 let () =
 (*
   (* Check the number of command-line arguments *)
@@ -45,13 +39,7 @@ let () =
   let () = write_file outfile result_graph in
   (*let () = export graph "./exportfile.txt"  in*)*)
   let file = "score.txt" in 
-  let team_list = read_teams file in   
-  let () = Printf.printf " - Equipes extraites du fichier score.txt :\n%!" in
-  let () = print_team_list team_list in
-  let () = write_graph "./graphs/graphEquipe1.txt" (List.nth team_list 1) team_list in
-  let () = write_graph "./graphs/graphEquipe0.txt" (List.nth team_list 0) team_list in
-  let graph = from_file "./graphs/graphEquipe1.txt" in
-  let () = export graph "./exportfile.txt"  in
+  let _cricket_results = cricket_resolution file in
+
   
   ()
-
