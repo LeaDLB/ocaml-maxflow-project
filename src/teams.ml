@@ -1,5 +1,4 @@
 open Gfile
-
 type team =
  {  
     id: int;
@@ -48,15 +47,28 @@ let find_match_pairs list =
   in loop [] list
 ;;
 
-let rec write_nodes file length index  = 
-if index=length then () 
-else
-  begin
-    let x = compute_x index in 
-    let y = compute_y index in
-    let string = "n "^(string_of_int x)^" "^(string_of_int y)^" "^(string_of_int index)^"\n" in 
-    Out_channel.output_string file string ; write_nodes file length (index+1)
-  end 
+let rec write_nodes_others file list  = 
+  match list with 
+  |[]-> ()
+  |a::next -> 
+    begin
+      let x = compute_x a.id in 
+      let y = compute_y a.id in
+      let string = "n "^(string_of_int x)^" "^(string_of_int y)^" "^(string_of_int a.id)^"\n" in 
+      Out_channel.output_string file string ; write_nodes_others file next
+    end 
+ ;;
+
+ let rec write_nodes_pairs file index list  = 
+  match list with 
+  |[]-> ()
+  |_::next -> 
+    begin
+      let x = compute_x index in 
+      let y = compute_y index in
+      let string = "n "^(string_of_int x)^" "^(string_of_int y)^" "^(string_of_int index)^"\n" in 
+      Out_channel.output_string file string ; write_nodes_pairs file (index+1) next
+    end 
  ;;
 
  let rec write_source_arcs file pairs index index_arc= 
@@ -81,11 +93,11 @@ let rec write_infinite_arcs file length_pairs pairs index index_arc=
   match pairs with 
   |[] -> ()
   |(teamA,teamB,_)::next -> 
-    let string1 = "\ne "^(string_of_int (index))^" "^(string_of_int teamA.id)^" "^(string_of_int(index_arc))^" "^(string_of_int max_int) in 
-    let string2 = "\ne "^(string_of_int (index))^" "^(string_of_int teamB.id)^" "^(string_of_int(index_arc+1))^" "^(string_of_int max_int) in 
+    let string1 = "e "^(string_of_int (index))^" "^(string_of_int teamA.id)^" "^(string_of_int(index_arc))^" "^(string_of_int max_int)^"\n" in 
+    let string2 = "e "^(string_of_int (index))^" "^(string_of_int teamB.id)^" "^(string_of_int(index_arc+1))^" "^(string_of_int max_int)^"\n" in 
     Out_channel.output_string file string1 ;
     Out_channel.output_string file string2 ;
-    write_infinite_arcs file length_pairs next (index+1) (index_arc+2)
+    write_infinite_arcs file length_pairs next (index+1) (index_arc+2) 
 ;; 
 
 
@@ -105,53 +117,36 @@ let write_graph file current_team team_list =
   let pairs = find_match_pairs others in 
   let length_others = List.length others in 
   let length_pairs = List.length pairs in 
-  
+  let length_teams = List.length team_list in
+  let () = Printf.printf "length others = %d\n%!" length_others in
+  let () = Printf.printf "length pairs %d\n%!" length_pairs in
+
+  (*print pair list*)
+  let rec print_pair list = 
+    match list with 
+    |[] -> ()
+    |(a,b,v)::next-> Printf.printf "TeamA = %s %d   TeamB = %s %d   V = %d\n" a.name  a.id b.name b.id v ; print_pair next
+  in 
+  let () = print_pair pairs in
 
   (*Write source node*)
   Out_channel.output_string ff "n 20 300 0\n" ;
   
   (*Write nodes*)
-  let () = write_nodes ff length_others 1 in
-  let () = write_nodes ff length_pairs (length_others+1) in 
+  let () = write_nodes_others ff others in
+  let () = write_nodes_pairs ff (length_teams+1) pairs in 
   
   (*Write target node*)
-  Out_channel.output_string ff ("n 500 300 "^(string_of_int (length_others+length_pairs+1))^"\n\n") ;
-
-  (*
-  Out_channel.output_string ff "n 100 200 1\n" ;
-  Out_channel.output_string ff "n 100 300 2\n" ;
-  Out_channel.output_string ff "n 100 400 3\n" ;
-
-  Out_channel.output_string ff "n 200 200 4\n" ;
-  Out_channel.output_string ff "n 200 300 5\n" ;
-  Out_channel.output_string ff "n 200 400 6\n" ;*)
-
-  
+  Out_channel.output_string ff ("n 500 300 "^(string_of_int (length_teams+length_pairs+1))^"\n\n") ;
 
   (*Write 3 arcs from source*)
-  let () = write_source_arcs ff pairs (length_others+1) 0 in
+  let () = write_source_arcs ff pairs (length_teams+1) 0 in
 
   (*Write infinite arcs*)
-  let () = write_infinite_arcs ff length_pairs pairs (length_others+1) (length_pairs+2) in
+  let () = write_infinite_arcs ff length_pairs pairs (length_teams+1) (length_pairs) in
 
   (*Write 3 last arcs to the target*)
-  let () = write_end_arcs current_team length_pairs length_others ff others (length_pairs*3+1) in 
-
-  (*
-  let val1 = (current_team.wins+current_team.total_left) - (List.nth others 0).wins in
-  let val2 = (current_team.wins+current_team.total_left) - (List.nth others 1).wins in 
-  let val3 = (current_team.wins+current_team.total_left) - (List.nth others 2).wins in
-  Out_channel.output_string ff ("e 4 7 3 "^(string_of_int) val1);
-  Out_channel.output_string ff ("\ne 5 7 4 "^(string_of_int) val2);
-  Out_channel.output_string ff ("\ne 6 7 5 "^(string_of_int) val3);
-
-  (*Write the 6 infinite arc*)
-  Out_channel.output_string ff ("\ne 1 4 6 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 1 5 7 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 2 4 8 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 2 6 9 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 3 5 10 "^(string_of_int) max_int);
-  Out_channel.output_string ff ("\ne 3 6 11 "^(string_of_int) max_int);*)
+  let () = write_end_arcs current_team length_pairs length_teams ff others (length_pairs*3) in 
 
   Out_channel.output_string ff "\n\n%% End of graph\n" ;
 

@@ -4,6 +4,7 @@
   open Gfile
 open Tools*)
 open Teams
+open Gfile
     
 let () =
 (*
@@ -47,7 +48,10 @@ let () =
   let team_list = read_teams file in   
   let () = Printf.printf " - Equipes extraites du fichier score.txt :\n%!" in
   let () = print_team_list team_list in
-  let () = write_graph "./graphs/graphEquipe1.txt" (List.nth team_list 0) team_list in
-  let () = write_graph "./graphs/graphEquipe2.txt" (List.nth team_list 1) team_list in
+  let () = write_graph "./graphs/graphEquipe1.txt" (List.nth team_list 1) team_list in
+  let () = write_graph "./graphs/graphEquipe0.txt" (List.nth team_list 0) team_list in
+  let graph = from_file "./graphs/graphEquipe1.txt" in
+  let () = export graph "./exportfile.txt"  in
+  
   ()
 
