@@ -123,14 +123,6 @@ let write_graph file current_team team_list =
   let length_pairs = List.length pairs in 
   let length_teams = List.length team_list in
 
-  (*print pair list
-  let rec print_pair list = 
-    match list with 
-    |[] -> ()
-    |a::next-> Printf.printf "TeamA = %s %d   \n" a.name  a.id ; print_pair next
-  in 
-  let () = print_pair others in*)
-
   (*Write source node*)
   Out_channel.output_string ff "n 20 300 0\n" ;
   
@@ -213,7 +205,3 @@ let cricket_resolution file =
   in graph_loop team_list []
 ;;
 
-
-
-(*1 = pas eliminé
-   0 = éliminé*)
